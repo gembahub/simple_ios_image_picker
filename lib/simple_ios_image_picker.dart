@@ -4,8 +4,11 @@ import 'package:flutter/services.dart';
 class SimpleIosImagePicker {
   final methodChannel = const MethodChannel('simple_ios_image_picker');
 
+  /// [limit] is the maximum number of images that can be selected. If it is 0, there is no limit.
+  ///
+  /// [compressionQuality] is the quality of the image compression. The value is between 0.0 and 1.0.
   Future<List<XFile>?> pickImages({
-    int limit = 10,
+    int limit = 0,
     double compressionQuality = 1.0,
   }) async {
     final List<dynamic>? resultList =
