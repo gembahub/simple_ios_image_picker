@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  dynamic _platformVersion = 'Unknown';
   final _simpleIosImagePickerPlugin = SimpleIosImagePicker();
 
   @override
@@ -27,12 +27,14 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    String platformVersion;
+    dynamic platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _simpleIosImagePickerPlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _simpleIosImagePickerPlugin.pickImages(
+              compressionQuality: 1.0) ??
+          'Unknown platform version';
+      print(platformVersion.toString());
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
