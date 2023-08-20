@@ -1,7 +1,7 @@
 name: simple_ios_image_picker
-description: A new Flutter plugin project.
+description: simple ios image picker.
 version: 0.0.1
-# homepage:
+homepage: https://corp.artisan.inc/
 
 environment:
   sdk: ">=3.0.5 <4.0.0"
@@ -16,7 +16,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.1
 
 flutter:
   plugin:
