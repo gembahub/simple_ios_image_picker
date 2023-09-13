@@ -61,7 +61,7 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
             dispatchGroup.enter()
             result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                 if let uiImage = image as? UIImage {
-                    let resizedImage = fetchResizeImage(image: uiImage, targetSize: CGSize(width: minWidth, height: minHeight))
+                    let resizedImage = self.fetchResizeImage(image: uiImage, targetSize: CGSize(width: self.minWidth, height: self.minHeight))
                     if let data = resizedImage.jpegData(compressionQuality: self.compressionQuality){
                         imagesData.append(data)
                     }
