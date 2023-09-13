@@ -1,5 +1,5 @@
-import 'package:cross_file/cross_file.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class SimpleIosImagePicker {
   final methodChannel = const MethodChannel('simple_ios_image_picker');
@@ -10,6 +10,8 @@ class SimpleIosImagePicker {
   Future<List<XFile>?> pickImages({
     int limit = 0,
     double compressionQuality = 1.0,
+    int? minWidth,
+    int? minHeight,
   }) async {
     final List<dynamic>? resultList =
         await methodChannel.invokeMethod('pickImage', {
@@ -20,17 +22,28 @@ class SimpleIosImagePicker {
     if (resultList == null) {
       return null;
     }
-    final uint8ListList = _nativeResultToUint8ListList(resultList);
+    final uint8ListList = await _nativeResultToResizeUint8ListList(
+        resultList, minWidth, minHeight);
     final xFileList = await _uint8ListListToXFileList(uint8ListList);
     return xFileList;
   }
 
   /// convert native result to Uint8ListList
-  List<Uint8List> _nativeResultToUint8ListList(List<dynamic> nativeResult) {
+  Future<List<Uint8List>> _nativeResultToResizeUint8ListList(
+      List<dynamic> nativeResult, int? minWidth, int? minHeight) async {
     var uint8ListList = <Uint8List>[];
 
     for (var item in nativeResult) {
-      uint8ListList.add(item as Uint8List);
+      if (minWidth == null || minHeight == null) {
+        final resizedUint8List = await _resizeUint8List(
+          item as Uint8List,
+          minWidth,
+          minHeight,
+        );
+        uint8ListList.add(resizedUint8List);
+      } else {
+        uint8ListList.add(item as Uint8List);
+      }
     }
 
     return uint8ListList;
@@ -50,5 +63,18 @@ class SimpleIosImagePicker {
     }
 
     return xFileList;
+  }
+
+  Future<Uint8List> _resizeUint8List(
+    Uint8List uint8list,
+    int? minWidth,
+    int? minHeight,
+  ) async {
+    final compressList = await FlutterImageCompress.compressWithList(
+      uint8list,
+      minWidth: minWidth ?? 1920,
+      minHeight: minHeight ?? 1080,
+    );
+    return compressList;
   }
 }
