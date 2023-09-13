@@ -10,13 +10,15 @@ class SimpleIosImagePicker {
   Future<List<XFile>?> pickImages({
     int limit = 0,
     double compressionQuality = 1.0,
-    int? minWidth,
-    int? minHeight,
+    int minWidth = 1920,
+    int minHeight = 1080,
   }) async {
     final List<dynamic>? resultList =
         await methodChannel.invokeMethod('pickImage', {
       "limit": limit,
       'compressionQuality': compressionQuality,
+      'minWidth': minWidth,
+      'minHeight': minHeight,
     });
 
     if (resultList == null) {
@@ -34,16 +36,7 @@ class SimpleIosImagePicker {
     var uint8ListList = <Uint8List>[];
 
     for (var item in nativeResult) {
-      if (minWidth != null || minHeight != null) {
-        final resizedUint8List = await _resizeUint8List(
-          item as Uint8List,
-          minWidth,
-          minHeight,
-        );
-        uint8ListList.add(resizedUint8List);
-      } else {
-        uint8ListList.add(item as Uint8List);
-      }
+      uint8ListList.add(item as Uint8List);
     }
 
     return uint8ListList;
@@ -63,18 +56,5 @@ class SimpleIosImagePicker {
     }
 
     return xFileList;
-  }
-
-  Future<Uint8List> _resizeUint8List(
-    Uint8List uint8list,
-    int? minWidth,
-    int? minHeight,
-  ) async {
-    final compressList = await FlutterImageCompress.compressWithList(
-      uint8list,
-      minWidth: minWidth ?? 1920,
-      minHeight: minHeight ?? 1080,
-    );
-    return compressList;
   }
 }
