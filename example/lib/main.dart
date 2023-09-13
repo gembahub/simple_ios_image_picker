@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion = await _simpleIosImagePickerPlugin.pickImages(
-              compressionQuality: 1.0) ??
+              compressionQuality: 1.0, minHeight: 1440, minWidth: 1080) ??
           'Unknown platform version';
       print(platformVersion.toString());
     } on PlatformException {

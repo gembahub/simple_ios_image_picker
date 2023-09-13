@@ -6,7 +6,7 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
     
     private var result: FlutterResult?
     private var compressionQuality: Double = 1.0
-    private var minWidth: Int = 1920
+    private var minWidth: Int = 1440
     private var minHeight: Int = 1080
     
     public static func register(with registrar: FlutterPluginRegistrar) {
