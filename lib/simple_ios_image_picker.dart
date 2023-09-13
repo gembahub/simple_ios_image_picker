@@ -34,7 +34,7 @@ class SimpleIosImagePicker {
     var uint8ListList = <Uint8List>[];
 
     for (var item in nativeResult) {
-      if (minWidth == null || minHeight == null) {
+      if (minWidth != null || minHeight != null) {
         final resizedUint8List = await _resizeUint8List(
           item as Uint8List,
           minWidth,
