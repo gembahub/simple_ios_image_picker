@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+
+import 'package:cross_file/cross_file.dart';
+
 import 'package:simple_ios_image_picker/simple_ios_image_picker.dart';
 
 void main() {
@@ -16,36 +18,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  dynamic _platformVersion = 'Unknown';
   final _simpleIosImagePickerPlugin = SimpleIosImagePicker();
+  List<XFile>? pickedFileList;
 
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    dynamic platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await _simpleIosImagePickerPlugin.pickImages(
-              compressionQuality: 1.0) ??
-          'Unknown platform version';
-      print(platformVersion.toString());
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
+  Future<void> pickSingleImage(double compressionQuality) async {
+    final fileList = await _simpleIosImagePickerPlugin.pickImages(
+        compressionQuality: compressionQuality);
     setState(() {
-      _platformVersion = platformVersion;
+      pickedFileList = fileList;
     });
   }
 
@@ -56,8 +36,16 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          children: [
+            Center(
+              child: Text('pickedFile: $pickedFileList'),
+            ),
+            ElevatedButton(
+              onPressed: () => pickSingleImage(1),
+              child: const Text('pick image'),
+            )
+          ],
         ),
       ),
     );
