@@ -21,12 +21,20 @@ class _MyAppState extends State<MyApp> {
   final _simpleIosImagePickerPlugin = SimpleIosImagePicker();
   List<XFile>? pickedFileList;
 
-  Future<void> pickSingleImage(double compressionQuality) async {
+  Future<void> pickSingleImage(
+    double compressionQuality,
+    int width,
+    int height,
+  ) async {
     final fileList = await _simpleIosImagePickerPlugin.pickImages(
-        compressionQuality: compressionQuality);
+      compressionQuality: compressionQuality,
+      width: width,
+      height: height,
+    );
     setState(() {
       pickedFileList = fileList;
     });
+    print('fileSize: ${await fileList!.first.length()}');
   }
 
   @override
@@ -37,12 +45,16 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
               child: Text('pickedFile: $pickedFileList'),
             ),
+            const SizedBox(
+              height: 40,
+            ),
             ElevatedButton(
-              onPressed: () => pickSingleImage(1),
+              onPressed: () => pickSingleImage(0.1, 100, 100),
               child: const Text('pick image'),
             )
           ],

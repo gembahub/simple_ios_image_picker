@@ -7,14 +7,20 @@ class SimpleIosImagePicker {
   /// [limit] is the maximum number of images that can be selected. If it is 0, there is no limit.
   ///
   /// [compressionQuality] is the quality of the image compression. The value is between 0.0 and 1.0.
+  ///
+  /// [width] and [height] are the width and height of the image.
   Future<List<XFile>?> pickImages({
     int limit = 0,
+    int? width,
+    int? height,
     double compressionQuality = 1.0,
   }) async {
     final List<dynamic>? resultList =
         await methodChannel.invokeMethod('pickImage', {
       "limit": limit,
       'compressionQuality': compressionQuality,
+      'width': width,
+      'height': height,
     });
 
     if (resultList == null) {
