@@ -1,11 +1,13 @@
-import Flutter
 import UIKit
+import Flutter
 import PhotosUI
 
 public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewControllerDelegate {
     
     private var result: FlutterResult?
     private var compressionQuality: Double = 1.0
+    private var targetWidth: CGFloat?
+    private var targetHeight: CGFloat?
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "simple_ios_image_picker", binaryMessenger: registrar.messenger())
@@ -17,14 +19,18 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
         self.result = result
         
         if call.method == "pickImage" {
-            if let arguments = call.arguments as? [String: Any],
-               let limit = arguments["limit"] as? Int {
+            if let arguments = call.arguments as? [String: Any] {
                 if let quality = arguments["compressionQuality"] as? Double {
-                self.compressionQuality = quality
-            }
-                showPicker(limit: limit)
-            } else {
-                showPicker(limit: 0)
+                    self.compressionQuality = quality
+                }
+                self.targetWidth = arguments["width"] as? CGFloat
+                self.targetHeight = arguments["height"] as? CGFloat
+
+                if let limit = arguments["limit"] as? Int {
+                    showPicker(limit: limit)
+                } else {
+                    showPicker(limit: 0)
+                }
             }
         }
     }
@@ -44,16 +50,20 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
     
     public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
-        
+
         var imagesData: [Data] = []
-        
         let dispatchGroup = DispatchGroup()
         
         for result in results {
             dispatchGroup.enter()
             result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
-                if let uiImage = image as? UIImage, let data = uiImage.jpegData(compressionQuality: self.compressionQuality) {
-                    imagesData.append(data)
+                if let uiImage = image as? UIImage {
+                    let size = CGSize(width: self.targetWidth ?? uiImage.size.width, 
+                                      height: self.targetHeight ?? uiImage.size.height)
+                    let resizedImage = self.resizedImage(image: uiImage, for: size)
+                    if let data = resizedImage?.jpegData(compressionQuality: self.compressionQuality) {
+                        imagesData.append(data)
+                    }
                 }
                 dispatchGroup.leave()
             }
@@ -63,5 +73,12 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
             self.result?(imagesData)
         }
     }
-}
 
+    private func resizedImage(image: UIImage, for size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        image.draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage
+    }
+}
