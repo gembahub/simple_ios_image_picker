@@ -6,8 +6,8 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
     
     private var result: FlutterResult?
     private var compressionQuality: Double = 1.0
-    private var targetWidth: CGFloat?
-    private var targetHeight: CGFloat?
+    private var maxWidth: CGFloat? 
+    private var maxHeight: CGFloat? 
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "simple_ios_image_picker", binaryMessenger: registrar.messenger())
@@ -20,17 +20,12 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
         
         if call.method == "pickImage" {
             if let arguments = call.arguments as? [String: Any] {
-                if let quality = arguments["compressionQuality"] as? Double {
-                    self.compressionQuality = quality
-                }
-                self.targetWidth = arguments["width"] as? CGFloat
-                self.targetHeight = arguments["height"] as? CGFloat
+                self.compressionQuality = (arguments["compressionQuality"] as? Double) ?? 1.0
+                self.maxWidth = arguments["maxWidth"] as? CGFloat
+                self.maxHeight = arguments["maxHeight"] as? CGFloat
 
-                if let limit = arguments["limit"] as? Int {
-                    showPicker(limit: limit)
-                } else {
-                    showPicker(limit: 0)
-                }
+                let limit = arguments["limit"] as? Int ?? 0
+                showPicker(limit: limit)
             }
         }
     }
@@ -58,10 +53,8 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
             dispatchGroup.enter()
             result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                 if let uiImage = image as? UIImage {
-                    let size = CGSize(width: self.targetWidth ?? uiImage.size.width, 
-                                      height: self.targetHeight ?? uiImage.size.height)
-                    let resizedImage = self.resizedImage(image: uiImage, for: size)
-                    if let data = resizedImage?.jpegData(compressionQuality: self.compressionQuality) {
+                    let resizedImage = self.resizeImage(image: uiImage, maxWidth: self.maxWidth, maxHeight: self.maxHeight)
+                    if let data = resizedImage.jpegData(compressionQuality: self.compressionQuality) {
                         imagesData.append(data)
                     }
                 }
@@ -74,11 +67,13 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
         }
     }
 
-    private func resizedImage(image: UIImage, for size: CGSize) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        image.draw(in: CGRect(origin: .zero, size: size))
-        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return resizedImage
+    private func resizeImage(image: UIImage, maxWidth: CGFloat?, maxHeight: CGFloat?) -> UIImage {
+        let widthRatio  = maxWidth.map { $0 / image.size.width } ?? 1
+        let heightRatio = maxHeight.map { $0 / image.size.height } ?? 1
+        let ratio = min(widthRatio, heightRatio)
+        let newSize = CGSize(width: image.size.width * ratio, height: image.size.height * ratio)
+        return UIGraphicsImageRenderer(size: newSize).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
     }
 }

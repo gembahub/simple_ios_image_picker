@@ -11,16 +11,16 @@ class SimpleIosImagePicker {
   /// [width] and [height] are the width and height of the image.
   Future<List<XFile>?> pickImages({
     int limit = 0,
-    int? width,
-    int? height,
+    int? maxWidth,
+    int? maxHeight,
     double compressionQuality = 1.0,
   }) async {
     final List<dynamic>? resultList =
         await methodChannel.invokeMethod('pickImage', {
       "limit": limit,
       'compressionQuality': compressionQuality,
-      'width': width,
-      'height': height,
+      'maxWidth': maxWidth,
+      'maxHeight': maxHeight,
     });
 
     if (resultList == null) {
@@ -29,6 +29,27 @@ class SimpleIosImagePicker {
     final uint8ListList = _nativeResultToUint8ListList(resultList);
     final xFileList = await _uint8ListListToXFileList(uint8ListList);
     return xFileList;
+  }
+
+  Future<List<Uint8List>?> pickImagesAsByData({
+    int limit = 0,
+    int? maxHeight,
+    int? maxWidth,
+    double compressionQuality = 1.0,
+  }) async {
+    final List<dynamic>? resultList =
+        await methodChannel.invokeMethod('pickImage', {
+      "limit": limit,
+      'compressionQuality': compressionQuality,
+      'maxHeight': maxHeight,
+      'maxWidth': maxWidth,
+    });
+
+    if (resultList == null) {
+      return null;
+    }
+    final uint8ListList = _nativeResultToUint8ListList(resultList);
+    return uint8ListList;
   }
 
   /// convert native result to Uint8ListList
