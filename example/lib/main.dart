@@ -1,8 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-
-import 'package:cross_file/cross_file.dart';
 
 import 'package:simple_ios_image_picker/simple_ios_image_picker.dart';
 
@@ -19,22 +18,33 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _simpleIosImagePickerPlugin = SimpleIosImagePicker();
-  List<XFile>? pickedFileList;
+  List<Uint8List>? pickedFileList;
 
   Future<void> pickSingleImage(
     double compressionQuality,
     int width,
     int height,
   ) async {
-    final fileList = await _simpleIosImagePickerPlugin.pickImages(
+    final fileList = await _simpleIosImagePickerPlugin.pickImagesAsByData(
       compressionQuality: compressionQuality,
-      width: width,
-      height: height,
+      maxWidth: width,
+      maxHeight: height,
     );
     setState(() {
       pickedFileList = fileList;
     });
-    print('fileSize: ${await fileList!.first.length()}');
+  }
+
+  Widget image() {
+    final imageList = pickedFileList;
+    if (imageList == null) return const SizedBox.shrink();
+
+    if (imageList.isNotEmpty) {
+      print('imageBytes: ${imageList.first.lengthInBytes}');
+      return Image.memory(imageList.first);
+    } else {
+      return const Text('No image picked.');
+    }
   }
 
   @override
@@ -42,19 +52,17 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Welcome'),
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(
-              child: Text('pickedFile: $pickedFileList'),
-            ),
+            Center(child: image()),
             const SizedBox(
               height: 40,
             ),
             ElevatedButton(
-              onPressed: () => pickSingleImage(0.1, 100, 100),
+              onPressed: () => pickSingleImage(0.1, 100, 200),
               child: const Text('pick image'),
             )
           ],
