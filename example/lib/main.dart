@@ -33,7 +33,6 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       pickedFileList = fileList;
     });
-    // print('fileSize: ${await fileList!.first.length()}');
   }
 
   Widget image() {
