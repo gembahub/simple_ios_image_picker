@@ -34,6 +34,7 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
         var configuration = PHPickerConfiguration()
         configuration.selectionLimit = limit
         configuration.filter = .images
+        configuration.selection = .ordered
         
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = self
