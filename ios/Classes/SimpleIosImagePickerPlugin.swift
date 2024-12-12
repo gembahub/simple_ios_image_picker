@@ -48,16 +48,16 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
     public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
 
-        var imagesData: [Data] = []
+        var imagesData: [Int: Data] = [:]
         let dispatchGroup = DispatchGroup()
         
-        for result in results {
+        for (index, result) in results.enumerated() {
             dispatchGroup.enter()
             result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                 if let uiImage = image as? UIImage {
                     let resizedImage = self.resizeImage(image: uiImage, maxWidth: self.maxWidth, maxHeight: self.maxHeight)
                     if let data = resizedImage.jpegData(compressionQuality: self.compressionQuality) {
-                        imagesData.append(data)
+                        imagesData[index] = data
                     }
                 }
                 dispatchGroup.leave()
@@ -65,7 +65,8 @@ public class SimpleIosImagePickerPlugin: NSObject, FlutterPlugin, PHPickerViewCo
         }
         
         dispatchGroup.notify(queue: .main) {
-            self.result?(imagesData)
+            let imageList = (0..<imagesData.count).map { imagesData[$0] }
+            self.result?(imageList)
         }
     }
 

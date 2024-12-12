@@ -1,3 +1,7 @@
+## 0.3.2
+
+- fix not ordered image list.
+
 ## 0.3.1
 
 - the feature of making images ordered is for iOS 15 or newer, so I responded to it.

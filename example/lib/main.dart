@@ -35,13 +35,26 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Widget image() {
+  Widget images() {
     final imageList = pickedFileList;
     if (imageList == null) return const SizedBox.shrink();
 
     if (imageList.isNotEmpty) {
       print('imageBytes: ${imageList.first.lengthInBytes}');
-      return Image.memory(imageList.first);
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: imageList
+              .map(
+                (image) => Image.memory(
+                  image,
+                  width: 200,
+                  height: 200,
+                ),
+              )
+              .toList(),
+        ),
+      );
     } else {
       return const Text('No image picked.');
     }
@@ -57,7 +70,7 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(child: image()),
+            Center(child: images()),
             const SizedBox(
               height: 40,
             ),
